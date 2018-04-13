@@ -15,16 +15,22 @@ public class MaxTemperature {
       System.exit(-1);
     }
     
+	// input types are not specified because using default TextInputFormat
     Job job = new Job();
+	// hadoop will find JAR associated with class
     job.setJarByClass(MaxTemperature.class);
     job.setJobName("Max temperature");
 
+	// can have multiple input paths
     FileInputFormat.addInputPath(job, new Path(args[0]));
+	// only single output path
     FileOutputFormat.setOutputPath(job, new Path(args[1]));
     
+	// set mapper and reducer 
     job.setMapperClass(MaxTemperatureMapper.class);
     job.setReducerClass(MaxTemperatureReducer.class);
 
+	// specify output types
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
     

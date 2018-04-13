@@ -1,4 +1,4 @@
-mvn package -DskipTests
+$ mvn package -DskipTests
 
 #####################################
 Ch 1 - Meet Hadoop
@@ -156,3 +156,115 @@ java MR
 		hadoop IntWritable = java Integer
 		hadoop Context
 			allows the Mapper/Reducer to interact with the rest of the Hadoop system
+
+	Job object
+		forms the specification of the job
+		gives you control over how the job is run
+
+	running on cluster
+		package code into JAR file 
+		Hadoop will distribute around the cluster
+		setJarByClass() will locate the relevant jar based on class name
+
+	addInputPath()
+		can have multiple input paths
+
+	setOutputPath()
+		single output path
+		if output path already exists, Hadoop will fail to avoid overwrite
+
+	$ export HADOOP_CLASSPATH=~/cbohara/hadoop-book/ch02-mr-intro/target/ch02-mr-intro-4.0.jar
+		add application classes to the classpath
+		hadoop script picks up
+
+	$ hadoop MaxTemperature path/to/input/ output/
+		when hadoop command invoked followed by classname as first arg
+			launches JVM to run the class
+		adds hadoop libraries and dependencies to the classpath
+		picks up hadoop config
+
+scaling out using HDFS + YARN
+	allows hadoop to move the MapReduce computation to each machine hosting a part of the data
+	orchestrated by YARN resource management system
+
+data flow
+	MR job
+		unit of work the client wants to be performed 
+		consists of
+			input data
+			MR program
+			config info
+
+	tasks
+		hadoop performs MR job by dividing into tasks
+			map tasks
+			reduce tasks
+		tasks are scheduled using YARN
+		run on nodes in the cluster
+		if a task fails > auto reschedule on a diff node
+
+	splits
+		hadoop divides the input to a MR job into fixed size pieces = input splits
+		hadoop creates 1 map task per each split
+		runs user defined map function for each record in the split
+		good split size = size of the HDFS data block
+			when you store a file in HDFS the system breaks the file down into a set of blocks
+
+	data locality optimization
+		hadoop does its best to run the map task on a node where the input data resides in HDFS
+
+	map tasks 
+		write output to local disk not HDFS
+		intermediate output is processed by reduce tasks
+		storing in HDFS with redudancy would be overkill
+		if the node running the map task failed before map output has been consumed by reduce task > rerun map on another node
+
+	reduce tasks 
+		sorted map outputs transferred across the network to node where reduce task is running
+		map output is merged > passed to user defined reduce function
+		output is usually stored into HDFS
+
+		number of reduce tasks is not governed by the size of the input
+		needs to be specified
+
+	shuffle
+		data flow between map and reduce tasks
+		when there are multiple reducers
+			map task partitions their output
+			create 1 partition per reduce task
+			can be many keys with assoc value per partition
+
+	combiner function
+		can add combiner to minimize data transfer between map and reduce tasks 
+		map output > combiner function > reduce input
+		combiner function = same code as reducer function
+			job.setMapperClass(MaxTemperatureMapper.class); 
+			job.setCombinerClass(MaxTemperatureReducer.class); 
+			job.setReducerClass(MaxTemperatureReducer.class);
+		still need reducer to combine input from different mappers
+
+		mapper 1 output			combiner 1 output
+		(1950, 0)				(1950, 20)
+		(1950, 20)
+		(1950, 10)											reducer input			reducer output
+															(1950, [20. 25])		(1950, 25)
+		mapper 2 output			combiner 2 output
+		(1950, 25)				(1950, 25)
+		(1950, 15)
+
+hadoop streaming
+	write map and reduce functions in other languages besides java
+	uses unix stdin and stdout
+	ideal for text processing
+
+	map input
+		data passed via stdin > map function
+	map output
+		key-value written as single tab delimited line to stdout
+	reduce input
+		same as map output passed via stdin
+		sorted by key
+	reduce function
+		writes results to stdout
+
+$ cat input/ncdc/sample.txt | python ch02-mr-intro/src/main/python/max_temperature_map.py | sort | python ch02-mr-intro/src/main/python/max_temperature_reduce.py
