@@ -243,14 +243,14 @@ data flow
 			job.setReducerClass(MaxTemperatureReducer.class);
 		still need reducer to combine input from different mappers
 
-		mapper 1 output			combiner 1 output
-		(1950, 0)				(1950, 20)
-		(1950, 20)
-		(1950, 10)											reducer input			reducer output
-															(1950, [20. 25])		(1950, 25)
-		mapper 2 output			combiner 2 output
-		(1950, 25)				(1950, 25)
-		(1950, 15)
+	mapper 1 output		combiner 1 output
+	(1950, 0)			(1950, 20)
+	(1950, 20)
+	(1950, 10)								reducer input		reducer output
+											(1950, [20. 25])	(1950, 25)
+	mapper 2 output		combiner 2 output
+	(1950, 25)			(1950, 25)
+	(1950, 15)
 
 hadoop streaming
 	write map and reduce functions in other languages besides java
@@ -267,4 +267,5 @@ hadoop streaming
 	reduce function
 		writes results to stdout
 
-$ cat input/ncdc/sample.txt | python ch02-mr-intro/src/main/python/max_temperature_map.py | sort | python ch02-mr-intro/src/main/python/max_temperature_reduce.py
+$ cat input/ncdc/sample.txt | \ ch02-mr-intro/src/main/python/max_temperature_map.py | \
+sort | ch02-mr-intro/src/main/python/max_temperature_reduce.py
