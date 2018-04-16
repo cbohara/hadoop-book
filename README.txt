@@ -269,3 +269,50 @@ hadoop streaming
 
 $ cat input/ncdc/sample.txt | \ ch02-mr-intro/src/main/python/max_temperature_map.py | \
 sort | ch02-mr-intro/src/main/python/max_temperature_reduce.py
+
+
+#####################################
+Ch 3 - HDFS
+#####################################
+
+distributed file system
+	manage storage across multiple machines 
+	network based
+	optimized to work with very large files
+	streaming data access = write once read many times = most efficient data processing pattern
+		data set copied from source into HDFS
+			slow to write first record
+		various analysis on data is performed over time
+			fast to read entire dataset
+
+
+#####################################
+Ch 5 - Hadoop I/O
+#####################################
+
+serialization
+	turning structured objects into byte streams for
+		transmission over a network
+		writing to persistant storage
+
+deserialization
+	turning byte stream back into structured objects 
+
+remote procedure calls (RPC)
+	interprocess communication between the nodes implemented using RPC
+	use serialization to render the message to binary system > remote node 
+	remote node deserializes binary stream to original message
+
+Writables = Hadoop's own serialization format
+	defines 2 methods
+		write
+			writes its state to DataOut put binary stream
+		readFields 
+			reading its state from DataInput binary stream
+
+WritableComparables 
+	need to sort keys in sorting phase 
+		makes comparison of types critical
+	compare records read from a stream without deserializing them into objects
+	avoids any overhead of object creation
+
