@@ -316,3 +316,27 @@ WritableComparables
 	compare records read from a stream without deserializing them into objects
 	avoids any overhead of object creation
 
+
+#####################################
+Ch 6 - Developing a MR Java App 
+#####################################
+
+Configuration API
+	Configuration class 
+		config properties and their values
+		read from XML files
+			type info not stored in XML
+			properties interpreted as a given type when read
+			get() allows you to specify default value
+	core-default.xml
+		default properties for the system
+	properties
+		those added later override earlier definitions
+		specify final = cannot be overwritten
+		override properties via command line using -Dproperty=value
+	BE AWARE
+		some properties have no effect when set in job submission
+		ex: if you try to set yarn.nodemanager.resource.memory-mb in job submission it will be ignored
+		needs to be sent in yarn-site.xml
+	use -D to set property via command line
+		ex: -D mapreduce.job.reduces=n
